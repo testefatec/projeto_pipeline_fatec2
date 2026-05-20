@@ -1,20 +1,35 @@
-# main.py
+# main.py 
 
-def dividir(a, b):
-    return a / b
+def saudacao(nome: str) -> str: 
 
+    """Retorna uma saudação segura.""" 
 
-def saudacao(nome):
-    return f"Olá, {nome}!"
+    if not isinstance(nome, str): 
 
+        raise TypeError("Nome deve ser uma string") 
 
-def main():
-    print(saudacao("Gabriel"))
+    return f"Olá, {nome}! Bem-vindo ao sistema." 
 
-    resultado = dividir(10, 2)
+ 
 
-    print(f"Resultado da divisão: {resultado}")
+ 
 
+def calcular_media(notas: list) -> float: 
 
-if __name__ == "__main__":
-    main()
+    """Calcula a média de uma lista de notas.""" 
+
+    if not notas: 
+
+        raise ValueError("Lista de notas não pode ser vazia") 
+
+    return sum(notas) / len(notas) 
+
+ 
+
+ 
+
+if __name__ == "__main__": 
+
+    print(saudacao("Aluno FATEC")) 
+
+    print(f'Média: {calcular_media([8.5, 9.0, 7.5])}') 
