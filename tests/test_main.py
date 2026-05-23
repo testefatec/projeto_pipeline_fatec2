@@ -1,6 +1,6 @@
-# tests/test_main.py 
+# tests/test_main.py
 
-import pytest 
+import pytest
 import sys
 from pathlib import Path
 
@@ -8,35 +8,29 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from main import saudacao, calcular_media
- 
 
-class TestSaudacao: 
 
-    def test_saudacao_nome_valido(self): 
+class TestSaudacao:
 
-        resultado = saudacao("Maria") 
+    def test_saudacao_nome_valido(self):
 
-        assert "Maria" in resultado 
+        resultado = saudacao("Maria")
 
- 
+        assert "Maria" in resultado
 
-    def test_saudacao_tipo_invalido(self): 
 
-        with pytest.raises(TypeError): 
+    def test_saudacao_tipo_invalido(self):
 
-            saudacao(123) 
+        with pytest.raises(TypeError):
 
- 
+            saudacao(123)
 
- 
 
-class TestCalcularMedia: 
+class TestCalcularMedia:
 
-    def test_media_simples(self): 
+    def test_media_simples(self):
 
-        assert calcular_media([10, 8, 6]) == 8.0 
-
- 
+        assert calcular_media([10, 8, 6]) == 8.0
 
     def test_lista_vazia(self):
 
