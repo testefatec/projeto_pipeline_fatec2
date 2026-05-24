@@ -1,35 +1,9 @@
-# =============================================================================
-# DEPENDÊNCIAS DO PROJETO - FATEC
-# =============================================================================
-# Este arquivo lista todas as dependências necessárias para o projeto
-#
-# Para instalar: pip install -r requirements.txt
-# Para gerar: pip freeze > requirements.txt
-# =============================================================================
+# requirements.txt 
 
-# -----------------------------------------------------------------------------
-# DEPENDÊNCIAS DE PRODUÇÃO
-# -----------------------------------------------------------------------------
-# Adicione aqui as bibliotecas necessárias para a aplicação funcionar
-# Exemplos:
-flask==3.0.0        # Framework web
-# requests==2.31.0    # Requisições HTTP
-# python-dotenv==1.0.0  # Variáveis de ambiente
+flask==3.0.0 
 
-# -----------------------------------------------------------------------------
-# DEPENDÊNCIAS DE DESENVOLVIMENTO (opcional - podem estar separadas)
-# -----------------------------------------------------------------------------
-# Ferramentas de teste
-pytest==7.4.3
-pytest-cov==4.1.0
+requests==2.31.0 
 
-# Análise de código
-flake8==6.1.0
-black==23.12.1
-pylint==3.0.3
+pytest==8.0.0 
 
-# Segurança
-bandit==1.7.5  # Análise de segurança estática
-
-# Documentação
-# sphinx==7.2.6
+flake8==7.0.0 
