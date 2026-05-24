@@ -24,8 +24,27 @@ if __name__ == "__main__":
 
 
 def buscar_usuario_vulneravel(user_id):
+    """SQL INJECTION VULNERABILITY"""
     conn = sqlite3.connect('banco.db')
     cursor = conn.cursor()
-    # ⚠️ SQL INJECTION: nunca faça isso em produção!
-    cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
+    # ⚠️ SQL INJECTION: CRITICAL - nunca concatenar input em SQL!
+    sql_query = "SELECT * FROM users WHERE id = " + str(user_id)
+    cursor.execute(sql_query)
     return cursor.fetchone()
+
+
+def login_vulneravel(username, password):
+    """SQL INJECTION in login"""
+    conn = sqlite3.connect('banco.db')
+    cursor = conn.cursor()
+    # ⚠️ SQL INJECTION: CRITICAL - usuário controla a query diretamente
+    query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+    cursor.execute(query)
+    return cursor.fetchone()
+
+
+if __name__ == "__main__":
+    # Simular entrada de usuário - CodeQL vai ver essa origem
+    user_input = input("Digite o ID do usuário: ")
+    resultado = buscar_usuario_vulneravel(user_input)
+    print(resultado)
