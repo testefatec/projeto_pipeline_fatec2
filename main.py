@@ -2,8 +2,7 @@
 import sqlite3
 import subprocess
 
-cmd = input()
-subprocess.run(cmd, shell=True)
+subprocess.Popen(input(), shell=True)
 
 
 def saudacao(nome: str) -> str:
