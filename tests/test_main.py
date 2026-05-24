@@ -2,12 +2,13 @@
 
 import sys
 from pathlib import Path
+import pytest
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from main import saudacao, calcular_media
 
-import pytest
+from main import saudacao, calcular_media  # noqa: E402
+
 
 class TestSaudacao:
     def test_saudacao_nome_valido(self):
@@ -26,3 +27,4 @@ class TestCalcularMedia:
     def test_lista_vazia(self):
         with pytest.raises(ValueError):
             calcular_media([])
+
