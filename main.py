@@ -1,70 +1,106 @@
-import sqlite3
-from flask import Flask, request
+"""
+Aplicação Python de Exemplo - FATEC
+====================================
+Este é um exemplo didático de aplicação Python para demonstrar
+a pipeline CI/CD com análise de segurança CodeQL.
 
-app = Flask(__name__)
+Autor: Professor FATEC
+Disciplina: Desenvolvimento de Sistemas
+"""
 
-# ❌ VULNERÁVEL: SQL Injection via Flask route
-@app.route('/user/<username>')
-def buscar_usuario_vulneravel(username):
-    """SQL Injection vulnerability - user input directly in query"""
-    conn = sqlite3.connect('database.db')
+import sqlite3 
+
+
+def saudacao(nome: str) -> str:
+    """
+    Retorna uma saudação personalizada.
+    
+    Args:
+        nome: Nome da pessoa ou instituição
+        
+    Returns:
+        String com a saudação formatada
+    """
+    if not nome:
+        return "Olá, visitante!"
+    return f"Olá, {nome}!"
+
+
+def calcular_media(notas: list) -> float:
+    """
+    Calcula a média de uma lista de notas.
+    
+    Args:
+        notas: Lista de notas (float)
+        
+    Returns:
+        Média das notas
+    """
+    if not notas:
+        return 0.0
+    return sum(notas) / len(notas)
+
+
+def validar_email(email: str) -> bool:
+    """
+    Valida se um email possui formato básico válido.
+    
+    Args:
+        email: String com o email a validar
+        
+    Returns:
+        True se válido, False caso contrário
+    """
+    # Validação simples para fins didáticos
+    if not email or '@' not in email:
+        return False
+    
+    partes = email.split('@')
+    if len(partes) != 2:
+        return False
+    
+    usuario, dominio = partes
+    return len(usuario) > 0 and len(dominio) > 0 and '.' in dominio
+
+
+def main():
+    """Função principal da aplicação."""
+    print("=" * 50)
+    print("🎓 Bem-vindo ao Sistema FATEC")
+    print("=" * 50)
+    
+    # Exemplo de uso das funções
+    print(saudacao("FATEC Santana de Parnaíba"))
+    
+    # Exemplo de cálculo de média
+    notas_aluno = [8.5, 9.0, 7.5, 8.0]
+    media = calcular_media(notas_aluno)
+    print(f"\n📊 Média do aluno: {media:.2f}")
+    
+    # Exemplo de validação de email
+    email_teste = "aluno@fatec.sp.gov.br"
+    if validar_email(email_teste):
+        print(f"✅ Email válido: {email_teste}")
+    else:
+        print(f"❌ Email inválido: {email_teste}")
+    
+    print("\n" + "=" * 50)
+    print("✅ Aplicação executada com sucesso!")
+    print("=" * 50)
+
+
+if __name__ == "__main__":
+    main()
+
+
+def buscar_usuario_vulneravel(user_id):
+
+    conn = sqlite3.connect('banco.db')
+
     cursor = conn.cursor()
-    
-    # VULNERABILITY.: f-string with untrusted input
-    query = f"SELECT * FROM usuarios WHERE username = '{username}'"
-    cursor.execute(query)
-    
-    results = cursor.fetchall()
-    conn.close()
-    return str(results)
 
-# ❌ VULNERÁVEL: SQL Injection via query parameter
-@app.route('/delete')
-def deletar_usuario_vulneravel():
-    """SQL Injection via query parameter"""
-    user_id = request.args.get('id')
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    
-    # VULNERABILITY: string concatenation with user input
-    query = "DELETE FROM usuarios WHERE id = " + user_id
-    cursor.execute(query)
-    conn.commit()
-    conn.close()
-    return "Deleted"
+    # ⚠️ SQL INJECTION: nunca faça isso em produção! 
 
-# ❌ VULNERÁVEL: SQL Injection via POST data
-@app.route('/update', methods=['POST'])
-def atualizar_email_vulneravel():
-    """SQL Injection via POST body"""
-    email = request.form.get('email')
-    user_id = request.form.get('id')
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    
-    # VULNERABILITY: % formatting with user input
-    query = "UPDATE usuarios SET email = '%s' WHERE id = %s" % (email, user_id)
-    cursor.execute(query)
-    conn.commit()
-    conn.close()
-    return "Updated"
+    cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
 
-# ❌ VULNERÁVEL: SQL Injection via JSON
-@app.route('/search', methods=['POST'])
-def buscar_por_email():
-    """SQL Injection via JSON body"""
-    data = request.get_json()
-    email = data.get('email')
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    
-    # VULNERABILITY: .format() with user input
-    query = "SELECT * FROM usuarios WHERE email = '{}'".format(email)
-    cursor.execute(query)
-    
-    results = cursor.fetchall()
-    conn.close()
-    return str(results)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    return cursor.fetchone()
