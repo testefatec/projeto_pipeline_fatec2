@@ -180,8 +180,7 @@ jobs:
       - name: 🧪 Executar testes
         run: |
           echo "🧪 Executando testes..."
-          # Exemplo: pytest tests/ --cov=. --cov-report=term
-          python -m pytest --version || echo "⚠️ Adicione testes ao projeto!"
+          python -m pytest tests/ -v --tb=short
           echo "✅ Testes concluídos!"
 
       # PASSO 5: Valida sintaxe e estilo do código
