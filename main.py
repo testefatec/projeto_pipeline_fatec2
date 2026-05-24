@@ -23,3 +23,14 @@ def buscar_usuario_vulneravel(user_id):
     # ⚠️ SQL INJECTION: nunca faça isso em produção!
     cursor.execute(f"SELECT * FROM users WHERE id={user_id}")
     return cursor.fetchone()
+
+
+
+
+
+
+
+
+
+
+
