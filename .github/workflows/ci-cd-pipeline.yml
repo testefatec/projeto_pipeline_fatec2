@@ -68,7 +68,7 @@ jobs:
 
       # PASSO 4: Inicializa o CodeQL para análise de segurança
       - name: 🔧 Inicializar CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           # Define que vamos analisar código Python
           languages: python
@@ -82,12 +82,12 @@ jobs:
       # PASSO 5: CodeQL faz a análise automática do código Python
       # Não precisa de build pois Python é interpretado
       - name: 🔍 Análise Automática do Código
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
 
       # PASSO 6: Executa a análise e envia resultados
       - name: 📊 Executar Análise CodeQL
         id: codeql-analyze
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:python"
           upload: true
@@ -110,8 +110,15 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/main")
           
+          # Valida se a resposta da API é um array válido
+          if ! echo "$ALERTS" | jq -e 'type == "array"' > /dev/null 2>&1; then
+            echo "❌ Erro: resposta inesperada da API do GitHub:"
+            echo "$ALERTS"
+            exit 1
+          fi
+
           # Conta o número de alertas
-          ALERT_COUNT=$(echo "$ALERTS" | jq '. | length' 2>/dev/null || echo "0")
+          ALERT_COUNT=$(echo "$ALERTS" | jq '. | length')
           
           echo "📊 Total de alertas abertos: $ALERT_COUNT"
           

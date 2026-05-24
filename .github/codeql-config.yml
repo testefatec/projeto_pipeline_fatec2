@@ -34,11 +34,6 @@ paths:
 # CAMINHOS IGNORADOS: Arquivos que NÃO serão analisados
 # -----------------------------------------------------------------------------
 paths-ignore:
-  # Ignora arquivos de teste (opcional - remova se quiser analisar testes)
-  - '**/test_*.py'
-  - '**/tests/**'
-  - '**/*_test.py'
-  
   # Ignora ambientes virtuais
   - '**/venv/**'
   - '**/virtualenv/**'
