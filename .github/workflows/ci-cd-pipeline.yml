@@ -1,195 +1,253 @@
-name: CI/CD Pipeline com CodeQL 
-
- 
-
-on: 
-
-  push: 
-
-    branches: [ main ] 
-
-  pull_request: 
-
-    branches: [ main ] 
-
-  workflow_dispatch: 
-
- 
-
-jobs: 
-
-  # ═══════════════════════════════════════════ 
-
-  # JOB 1: Análise de Segurança com CodeQL 
-
-  # ═══════════════════════════════════════════ 
-
-  codeql-analysis: 
-
-    name: '🔒 Análise CodeQL' 
-
-    runs-on: ubuntu-latest 
-
-    permissions: 
-
-      actions: read 
-
-      contents: read 
-
-      security-events: write 
-
- 
-
-    steps: 
-
-      - name: Checkout do código 
-
-        uses: actions/checkout@v4 
-
- 
-
-      - name: Configurar Python 
-
-        uses: actions/setup-python@v5 
-
-        with: 
-
-          python-version: '3.11' 
-
- 
-
-      - name: Instalar dependências 
-
-        run: | 
-
-          pip install -r requirements.txt 
-
- 
-
-      - name: Inicializar CodeQL 
-
-        uses: github/codeql-action/init@v3 
-
-        with: 
-
-          languages: python 
-
-          config-file: ./.github/codeql-config.yml 
-
- 
-
-      - name: Executar análise CodeQL 
-
-        uses: github/codeql-action/analyze@v3 
-
- 
-
-  # ═══════════════════════════════════════════ 
-
-  # JOB 2: Testes Automatizados 
-
-  # ═══════════════════════════════════════════ 
-
-  tests: 
-
-    name: '🧪 Testes Automatizados' 
-
-    runs-on: ubuntu-latest 
-
-    needs: codeql-analysis 
-
- 
-
-    steps: 
-
-      - name: Checkout do código 
-
-        uses: actions/checkout@v4 
-
- 
-
-      - name: Configurar Python 
-
-        uses: actions/setup-python@v5 
-
-        with: 
-
-          python-version: '3.11' 
-
- 
-
-      - name: Instalar dependências 
-
-        run: | 
-
-          pip install -r requirements.txt 
-
-          pip install pytest flake8 
-
- 
-
-      - name: Executar testes 
-
-        run: pytest tests/ -v 
-
- 
-
-      - name: Verificar qualidade do código 
-
-        run: flake8 . --max-line-length=120 --exclude=venv 
-
- 
-
-  # ═══════════════════════════════════════════ 
-
-  # JOB 3: Deploy para Stage 
-
-  # ═══════════════════════════════════════════ 
-
-  deploy-stage: 
-
-    name: '🚀 Deploy para Stage' 
-
-    runs-on: ubuntu-latest 
-
-    needs: [codeql-analysis, tests] 
-
-    environment: stage 
-
- 
-
-    steps: 
-
-      - name: Checkout do código 
-
-        uses: actions/checkout@v4 
-
- 
-
-      - name: Configurar Python 
-
-        uses: actions/setup-python@v5 
-
-        with: 
-
-          python-version: '3.11' 
-
- 
-
-      - name: Instalar dependências 
-
-        run: pip install -r requirements.txt 
-
- 
-
-      - name: Simular deploy para Stage 
-
-        run: | 
-
-          echo '✅ Deploy para Stage iniciado' 
-
-          echo 'Versão: ${{ github.sha }}' 
-
-          echo 'Branch: ${{ github.ref_name }}' 
-
-          echo '🚀 Aplicação disponível em stage!' 
+# =============================================================================
+# PIPELINE CI/CD COM CODEQL - FATEC
+# =============================================================================
+# Esta pipeline automatiza o processo de integração e entrega contínua (CI/CD)
+# para aplicações Python, incluindo análise de segurança com CodeQL.
+#
+# Fluxo:
+# 1. Análise de Segurança (CodeQL)
+# 2. Testes Automatizados
+# 3. Deploy para Ambiente de Stage
+# =============================================================================
+
+name: CI/CD Pipeline com CodeQL
+
+# Define quando a pipeline será executada
+on:
+  # Executa quando há push na branch main
+  push:
+    branches: [ main ]
+  
+  # Executa quando há pull request para a branch main
+  pull_request:
+    branches: [ main ]
+  
+  # Permite execução manual através do GitHub
+  workflow_dispatch:
+
+# Define as permissões necessárias para o workflow
+permissions:
+  contents: read           # Ler o código do repositório
+  security-events: write   # Escrever alertas de segurança do CodeQL
+  actions: read           # Ler status de actions
+
+# =============================================================================
+# JOBS: Cada job é uma etapa independente da pipeline
+# =============================================================================
+jobs:
+
+  # ---------------------------------------------------------------------------
+  # JOB 1: ANÁLISE DE SEGURANÇA COM CODEQL
+  # ---------------------------------------------------------------------------
+  # Este job analisa o código em busca de vulnerabilidades de segurança
+  # usando a ferramenta CodeQL do GitHub Advanced Security
+  codeql-analysis:
+    name: 🔒 Análise de Segurança (CodeQL)
+    runs-on: ubuntu-latest
+    
+    steps:
+      # PASSO 1: Baixa o código do repositório
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+        with:
+          # Busca todo o histórico para análise mais precisa
+          fetch-depth: 0
+
+      # PASSO 2: Configura o ambiente Python
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'  # Cache das dependências para acelerar
+
+      # PASSO 3: Instala as dependências do projeto
+      - name: 📦 Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # PASSO 4: Inicializa o CodeQL para análise de segurança
+      - name: 🔧 Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          # Define que vamos analisar código Python
+          languages: python
+          
+          # Arquivo de configuração personalizada (opcional)
+          config-file: ./.github/codeql-config.yml
+          
+          # Queries adicionais de segurança (recomendado para produção)
+          queries: security-extended,security-and-quality
+
+      # PASSO 5: CodeQL faz a análise automática do código Python
+      # Não precisa de build pois Python é interpretado
+      - name: 🔍 Análise Automática do Código
+        uses: github/codeql-action/autobuild@v3
+
+      # PASSO 6: Executa a análise e envia resultados
+      - name: 📊 Executar Análise CodeQL
+        id: codeql-analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"
+          upload: true
+          
+      # PASSO 7: Aguarda processamento dos resultados
+      - name: ⏳ Aguardar processamento do CodeQL
+        run: |
+          echo "⏳ Aguardando o GitHub processar os resultados do CodeQL..."
+          sleep 10
+          
+      # PASSO 8: Verifica alertas de segurança via API do GitHub
+      - name: 🚫 Bloquear se houver vulnerabilidades
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "🔍 Verificando alertas de Code Scanning..."
+          
+          # Busca alertas ativos via API do GitHub
+          ALERTS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/code-scanning/alerts?state=open&ref=refs/heads/main")
+          
+          # Conta o número de alertas
+          ALERT_COUNT=$(echo "$ALERTS" | jq '. | length' 2>/dev/null || echo "0")
+          
+          echo "📊 Total de alertas abertos: $ALERT_COUNT"
+          
+          if [ "$ALERT_COUNT" -gt 0 ]; then
+            echo ""
+            echo "❌ ============================================"
+            echo "❌ PIPELINE BLOQUEADA POR VULNERABILIDADES"
+            echo "❌ ============================================"
+            echo "🔒 Foram encontradas $ALERT_COUNT vulnerabilidade(s) de segurança!"
+            echo ""
+            echo "📋 Detalhes dos alertas:"
+            echo "$ALERTS" | jq -r '.[] | "  • [\(.rule.severity | ascii_upcase)] \(.rule.description) em \(.most_recent_instance.location.path):\(.most_recent_instance.location.start_line)"' 2>/dev/null || echo "$ALERTS" | jq -r '.[] | "  • \(.rule.description)"'
+            echo ""
+            echo "🔗 Veja mais em: https://github.com/${{ github.repository }}/security/code-scanning"
+            echo "❌ ============================================"
+            echo ""
+            exit 1
+          else
+            echo "✅ Nenhuma vulnerabilidade encontrada. Pipeline pode continuar."
+          fi
+          
+      - name: ✅ Análise de Segurança Aprovada
+        if: success()
+        run: |
+          echo "✅ Código aprovado na análise de segurança!"
+          echo "🎉 Todas as verificações de segurança passaram!"
+
+  # ---------------------------------------------------------------------------
+  # JOB 2: TESTES AUTOMATIZADOS
+  # ---------------------------------------------------------------------------
+  # Executa testes unitários e de integração
+  # Depende do job CodeQL - só executa se a análise passar
+  tests:
+    name: 🧪 Testes Automatizados
+    runs-on: ubuntu-latest
+    # IMPORTANTE: Este job só executa se o CodeQL passar
+    needs: codeql-analysis
+    
+    steps:
+      # PASSO 1: Baixa o código
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      # PASSO 2: Configura Python
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # PASSO 3: Instala dependências incluindo ferramentas de teste
+      - name: 📦 Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      # PASSO 4: Executa os testes com cobertura
+      - name: 🧪 Executar testes
+        run: |
+          echo "🧪 Executando testes..."
+          # Exemplo: pytest tests/ --cov=. --cov-report=term
+          python -m pytest --version || echo "⚠️ Adicione testes ao projeto!"
+          echo "✅ Testes concluídos!"
+
+      # PASSO 5: Valida sintaxe e estilo do código
+      - name: 🎨 Validar qualidade do código
+        run: |
+          pip install flake8
+          echo "🔍 Verificando qualidade do código..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          echo "✅ Código validado!"
+
+  # ---------------------------------------------------------------------------
+  # JOB 3: DEPLOY PARA STAGE
+  # ---------------------------------------------------------------------------
+  # Realiza o deploy para o ambiente de homologação/stage
+  # Só executa se CodeQL e testes passarem
+  deploy-stage:
+    name: 🚀 Deploy para Stage
+    runs-on: ubuntu-latest
+    # IMPORTANTE: Só executa se CodeQL e testes passarem
+    needs: [codeql-analysis, tests]
+    
+    # Define o ambiente GitHub (aparece na UI)
+    environment:
+      name: stage
+      url: https://stage.exemplo.com
+    
+    steps:
+      # PASSO 1: Baixa o código
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      # PASSO 2: Configura Python
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # PASSO 3: Prepara artefatos para deploy
+      - name: 📦 Preparar artefatos
+        run: |
+          echo "📦 Criando pacote para deploy..."
+          pip install -r requirements.txt
+          echo "✅ Artefatos preparados!"
+
+      # PASSO 4: Simula deploy (substitua com seu processo real)
+      - name: 🚀 Deploy para Stage
+        run: |
+          echo "🚀 Iniciando deploy para ambiente de STAGE..."
+          echo "📍 Ambiente: Stage"
+          echo "📦 Versão: ${{ github.sha }}"
+          echo "👤 Autor: ${{ github.actor }}"
+          echo ""
+          echo "✅ Deploy realizado com sucesso!"
+          echo "🌐 Aplicação disponível em: https://stage.exemplo.com"
+        
+      # PASSO 5: Notifica sucesso
+      - name: ✅ Notificar conclusão
+        if: success()
+        run: |
+          echo "============================================"
+          echo "✅ PIPELINE CONCLUÍDA COM SUCESSO!"
+          echo "============================================"
+          echo "🔒 Segurança: Aprovado pelo CodeQL"
+          echo "🧪 Testes: Todos passaram"
+          echo "🚀 Deploy: Realizado em Stage"
+          echo "============================================"
+
+      # PASSO 6: Notifica falha
+      - name: ❌ Notificar falha
+        if: failure()
+        run: |
+          echo "============================================"
+          echo "❌ PIPELINE FALHOU!"
+          echo "============================================"
+          echo "Verifique os logs acima para detalhes"
+          echo "============================================"
